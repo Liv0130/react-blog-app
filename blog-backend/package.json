@@ -11,6 +11,7 @@
     "brew": "^0.0.8",
     "dotenv": "^16.0.0",
     "eslint-config-prettier": "^8.5.0",
+    "esm": "^3.2.25",
     "koa": "^2.13.4",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^10.1.1",
@@ -22,7 +23,7 @@
     "nodemon": "^1.18.11"
   },
   "scripts": {
-    "start": "node src",
-    "start:dev": "nodemon --watch src/ src/index.js"
+    "start": "node -r esm src",
+    "start:dev": "nodemon --watch src/ -r esm src/index.js"
   }
 }
