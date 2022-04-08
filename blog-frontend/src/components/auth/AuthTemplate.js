@@ -22,8 +22,9 @@ const AuthTemplateBlock = styled.div`
 // 흰색박스
 const WhiteBox = styled.div`
   .logo-area {
+    font-size: 20px;
     display: block;
-    padding-bottom: 2rem;
+    padding-bottom: 2.5rem;
     text-align: center;
     font-weight: bold;
     letter-spacing: 2px;

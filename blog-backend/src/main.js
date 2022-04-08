@@ -5,7 +5,7 @@ import bodyParser from 'koa-bodyparser';
 import mongoose from 'mongoose';
 
 import api from './api';
-import createFakeData from './createFakeData';
+// import createFakeData from './createFakeData';
 import jwtMiddleware from './lib/jwtMiddleware';
 
 // 비구조화 할당을 통해 process.env 내부 값에 대한 레퍼런스 만들기
@@ -17,7 +17,7 @@ mongoose.connect(MONGO_URI, {
 })
 .then(() => {
   console.log('Connected to MongoDB');
-  createFakeData();
+  // createFakeData();
 })
 .catch(e => {
   console.error(e);
