@@ -82,7 +82,11 @@ const RegisterForm = () => {
   useEffect(() => {
     if (user) {
       navigate('/'); // 홈 화면으로 이동
-    }
+      try {
+        localStorage.setItem('user', JSON.stringify(user));
+      } catch (e) {
+        console.log('localStorage is not working');
+    }}
   }, [navigate, user]);
   // input변경 이벤트 핸들러
 

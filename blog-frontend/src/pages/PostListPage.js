@@ -1,11 +1,12 @@
-import Button from '../components/common/Button';
+import HeaderContainer from '../containers/common/HeaderContainer';
 
 const PostListPage = () => {
   return (
-  <div>
-    <Button>Button</Button>
-  </div>
-  )
+  <>
+    <HeaderContainer />
+    <div>Hello!</div>
+  </>
+  );
 }
 
 export default PostListPage;
