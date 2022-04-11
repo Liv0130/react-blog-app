@@ -1,5 +1,14 @@
+import HeaderContainer from "../containers/common/HeaderContainer";
+import PostViewerContainer from "../containers/post/PostViewerContainer";
+
+
 const PostPage = () => {
-  return <div>Post Page</div>;
+  return (
+  <>
+   <HeaderContainer />
+   <PostViewerContainer />
+  </>
+  );
 };
 
 export default PostPage;
