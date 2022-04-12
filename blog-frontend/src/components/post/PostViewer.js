@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 import palette from '../../lib/styles/palette';
 import Responsive from '../common/Responsive';
+import SubInfo from '../common/SubInfo';
+import Tags from '../common/Tags';
 
 const PostViewerBlock =  styled(Responsive)`
   margin-top: 4rem;
@@ -16,30 +18,6 @@ const PostHead = styled.div`
     margin: 0;
   }
 `;
-const SubInfo = styled.div`
-  margin-top: 1rem;
-  color: ${palette.gray[6]};
-
-// span 사이에 가운뎃점 문자 보여주기
-span + span:before {
-  color: 4{palette.gray[5]};
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
-  content: '\\87'; // 가운뎃점 문자
-}
-`;
-const Tags = styled.div`
-  margin-top: 0.5rem;
-  .tag {
-    display: inline-block;
-    color: ${palette.cyan[7]};
-    text-decoration: none;
-    margin-right: 0.5rem;
-    &:hover {
-      color: ${palette.cyan[6]};
-    }
-  }
-`;
 const PostContent = styled.div`
   font-size: 1.3125rem;
   color: ${palette.gray[8]};
@@ -47,13 +25,13 @@ const PostContent = styled.div`
 const PostViewer = ({ post, error, loading }) => {
   // 에러 발생 시
   if (error) {
-    if (error.response & error.response.status === 404) {
+    if (error.response && error.response.status === 404) {
       return <PostViewerBlock>No post exist</PostViewerBlock>
     }
     return <PostViewerBlock>Error occured!</PostViewerBlock>
   }
   // 로딩중이거나 아직 포스트 데이터가 없을 때
-  if (loading || post) {
+  if (loading || !post) {
     return null;
   }
   const { title, body, user, publishedDate, tags } = post;
@@ -61,17 +39,12 @@ const PostViewer = ({ post, error, loading }) => {
     <PostViewerBlock>
       <PostHead>
         <h1>{title}</h1>
-        <SubInfo>
-          <span>
-            <b>{user.username}</b>
-          </span>
-          <span>{new Date(publishedDate).toLocaleDateString()}</span>
-        </SubInfo>
-        <Tags>
-          {tags.map(tag => (
-            <div className='tag'>#{tag}</div>
-          ))}
-        </Tags>
+        <SubInfo
+        username={user.username}
+        publishedDate={publishedDate}
+        hasMarginTop
+        />
+        <Tags tags={tags} />
       </PostHead>
       <PostContent
       dangerouslySetInnerHTML={{__html: body}} />
