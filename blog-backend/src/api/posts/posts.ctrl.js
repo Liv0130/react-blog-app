@@ -1,8 +1,33 @@
 import Post from '../../models/post';
 import mongoose from 'mongoose';
 import Joi from 'joi';
+import sanitizeHtml from 'sanitize-html';
 
 const { ObjectId } = mongoose.Types;
+
+const sanitizeOption = {
+  allowedTags: [
+    'h1',
+    'h2',
+    'b',
+    'i',
+    'u',
+    's',
+    'p',
+    'ul',
+    'ol',
+    'li',
+    'blockquote',
+    'a',
+    'img'
+  ],
+  allowedAttributes: {
+    a: ['href', 'name', 'target'],
+    img: ['src'],
+    li: ['class']
+  },
+  allowedSchemes: ['data', 'http']
+};
 
 export const getPostById = async (ctx, next) => {
   const { id } = ctx.params;
@@ -53,10 +78,10 @@ export const write = async ctx => {
   const { title, body, tags } = ctx.request.body;
   const post = new Post({
     title,
-    body,
+    body: sanitizeHtml(body, sanitizeOption),
     tags,
     user: ctx.state.user
-  })
+  });
   try{
     await post.save();
     ctx.body = post;
@@ -64,6 +89,15 @@ export const write = async ctx => {
     ctx.throw(500, e);
   }
 };
+// html을 없애고 내용이 너무 길면 200자로 제한하는 함수
+const removeHtmlAndShorten = body => {
+  const filtered = sanitizeHtml(body, {
+    allowedTags: [],
+  });
+  return filtered.length < 200 ? filtered : `${filtered.slice(0, 200)}...`;
+};
+
+// GET /api/posts?username=&tag=&page=
 
 export const list = async ctx => {
   // query는 문자열이기 때문에 숫자로 변환해 주어야 함
@@ -88,14 +122,10 @@ export const list = async ctx => {
     .exec();
     const postCount = await Post.countDocuments(query).exec();
     ctx.set('Last-Page', Math.ceil(postCount / 10));
-    ctx.body = posts
-    .map(post => post.toJSON())
-    .map(post => ({
+    ctx.body = posts.map(post => ({
       ...post,
-      body:
-        post.body.length < 200 ? post.body : `${post.body.slice(0, 200)}...`
+      body: removeHtmlAndShorten(post.body),
     }));
-    ctx.body = posts;
   } catch (e) {
     ctx.throw(500, e);
   }
@@ -141,9 +171,13 @@ export const update = async ctx => {
     ctx.body = result.error;
     return;
   }
-
+  const nextData = {...ctx.request.body}; // 객체를 복사하고
+  // body값이 주어졌으면 HTML필터링
+  if (nextData.body) {
+    nextData.body = sanitizeHtml(nextData.body, sanitizeOption);
+  }
   try {
-    const post = await Post.findByIdAndUpdate(id, ctx.request.body, {
+    const post = await Post.findByIdAndUpdate(id, nextData, {
       new: true, // 이 값을 설정하면 업데이트된 데이터를 반환
       // false일 때는 업데이트되기 전의 데이터를 반환함.
     }).exec();
