@@ -48,7 +48,14 @@ export const getPostById = async (ctx, next) => {
     ctx.throw(500, e);
   }
 }
-
+export const checkOwnPost = (ctx, next) => {
+  const { user, post } = ctx.state;
+  if (post.user._id.toString() !== user._id) {
+    ctx.status = 403;
+    return;
+  }
+  return next();
+};
 /*
 POST /api/posts
 {
@@ -90,7 +97,7 @@ export const write = async ctx => {
   }
 };
 // html을 없애고 내용이 너무 길면 200자로 제한하는 함수
-const removeHtmlAndShorten = body => {
+const removeHtmlAndShorten = (body) => {
   const filtered = sanitizeHtml(body, {
     allowedTags: [],
   });
@@ -118,11 +125,12 @@ export const list = async ctx => {
     const posts = await Post.find(query)
     .sort({_id: -1})
     .limit(10)
-    .skip((page-1)*10)
+    .skip((page - 1) * 10)
+    .lean()
     .exec();
     const postCount = await Post.countDocuments(query).exec();
     ctx.set('Last-Page', Math.ceil(postCount / 10));
-    ctx.body = posts.map(post => ({
+    ctx.body = posts.map((post) => ({
       ...post,
       body: removeHtmlAndShorten(post.body),
     }));
@@ -132,7 +140,7 @@ export const list = async ctx => {
 };
 
 /* GET /api/posts/:id */ 
-export const read = ctx => {
+export const read = async ctx => {
     ctx.body = ctx.state.post;
 };
 // 미들웨어를 이용해서 코드를 간소화 한 것임 (23.5.5)
@@ -172,12 +180,12 @@ export const update = async ctx => {
     return;
   }
   const nextData = {...ctx.request.body}; // 객체를 복사하고
-  // body값이 주어졌으면 HTML필터링
+  // // body값이 주어졌으면 HTML필터링
   if (nextData.body) {
     nextData.body = sanitizeHtml(nextData.body, sanitizeOption);
   }
   try {
-    const post = await Post.findByIdAndUpdate(id, nextData, {
+    const post = await Post.findByIdAndUpdate(id, ctx.request.body, {
       new: true, // 이 값을 설정하면 업데이트된 데이터를 반환
       // false일 때는 업데이트되기 전의 데이터를 반환함.
     }).exec();
@@ -191,11 +199,3 @@ export const update = async ctx => {
   }
 };
 
-export const checkOwnPost = (ctx, next) => {
-  const { user, post } = ctx.state;
-  if (post.user._id.toString() !== user._id) {
-    ctx.status = 403;
-    return;
-  }
-  return next();
-};
