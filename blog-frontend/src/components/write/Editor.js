@@ -41,7 +41,7 @@ const Editor = ({ title, body, onChangeField }) => {
 useEffect(() => {
   quillInstance.current = new Quill(quillElement.current, {
     theme: 'bubble',
-    placeholder: 'Life is a beautiful ride',
+    placeholder: 'Life is a beautiful ride...',
     modules: {
       // 더 많은 옵션
       // https://quilljs.com/docs/modules/toolbar/ 참고
@@ -62,6 +62,13 @@ quill.on('text-change', (delta, oldDelta, source) => {
   }
 });
 }, [onChangeField]);
+
+const mounted = useRef(false);
+useEffect(() => {
+  if (mounted.current) return;
+  mounted.current = true;
+  quillInstance.current.root.innerHTML = body;
+}, [body]);
 
 const onChangeTitle = e => {
   onChangeField({ key: 'title', value: e.target.value });
